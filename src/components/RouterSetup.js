@@ -20,7 +20,7 @@ function RouterSetup() {
       <Route path="/meals" element={<Meals />} />
       <Route path="/meals/new" element={<AddMealForm />} />
       <Route path="/meals/:id/edit" element={<EditMealForm />} />
-      <Route element={<NotFound />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
