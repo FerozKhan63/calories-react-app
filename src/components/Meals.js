@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 // import { ListGroup } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchMeals } from "../store/meal-slice";
+import { fetchMeals, deleteMeal } from "../store/meal-slice";
 import { Button, Card, ListGroup } from "react-bootstrap";
 import { useNavigate } from "react-router";
 import { Link } from "react-router-dom";
@@ -11,16 +11,36 @@ function Meals() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const meals = useSelector((state) => state.meals.allMeals);
+  const [meals, setMeals] = useState(
+    useSelector((state) => state.meals.allMeals)
+  );
+
   const userCalorieLimit = useSelector(
     (state) => state.profile.profileData.calorie_limit
   );
-  console.log("userCalorieLimit :>> ", userCalorieLimit);
 
-  console.log("meals :>> ", meals);
   useEffect(() => {
-    dispatch(fetchMeals());
+    dispatch(fetchMeals())
+      .unwrap()
+      .then((result) => {
+        setMeals(result);
+      });
   }, [meals.length]);
+
+  const deleteHandler = (meal) => {
+    dispatch(
+      deleteMeal({
+        id: meal.id,
+      })
+    )
+      .unwrap()
+      .then((originalPromiseResult) => {
+        setMeals(meals.filter((m) => m !== meal));
+      })
+      .catch((rejectedValueOrSerializedError) => {
+        alert(rejectedValueOrSerializedError.message);
+      });
+  };
 
   const renderMeals = meals?.map((meal) => {
     const { id, name, description, calorie_intake, start_date, end_date } =
@@ -45,6 +65,12 @@ function Meals() {
 
           <Button onClick={() => navigate(`/meals/${id}/edit`)}>
             Edit Meal
+          </Button>
+          <Button
+            className="btn btn-danger"
+            onClick={() => deleteHandler(meal)}
+          >
+            Delete Meal
           </Button>
         </Card>
       </div>

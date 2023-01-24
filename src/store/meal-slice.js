@@ -68,6 +68,22 @@ const addMeal = createAsyncThunk(
   }
 );
 
+const deleteMeal = createAsyncThunk(
+  "deleteMeal/mealSlice",
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      const meal = await api.delete(`/api/v1/meals/${id}`, {
+        headers: {
+          auth_token: `${JSON.parse(localStorage.getItem("auth_token"))}`,
+        },
+      });
+      return meal.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const mealSlice = createSlice({
   name: "meal",
   initialState: initialMealState,
@@ -87,9 +103,14 @@ const mealSlice = createSlice({
     [addMeal.rejected]: (state, action) => {
       state.error = action.payload.message;
     },
+    [deleteMeal.pending]: (state, action) => {},
+    [deleteMeal.fulfilled]: (state, action) => {},
+    [deleteMeal.rejected]: (state, action) => {
+      state.error = action.payload.message;
+    },
   },
 });
 
-export { fetchMeals, updateMeal, addMeal };
+export { fetchMeals, updateMeal, addMeal, deleteMeal };
 
 export default mealSlice.reducer;
