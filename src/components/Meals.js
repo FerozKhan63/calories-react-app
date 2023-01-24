@@ -1,0 +1,65 @@
+import { useState } from "react";
+import { useEffect } from "react";
+// import { ListGroup } from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchMeals } from "../store/meal-slice";
+import { Button, Card, ListGroup } from "react-bootstrap";
+import { useNavigate } from "react-router";
+import { Link } from "react-router-dom";
+
+function Meals() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const meals = useSelector((state) => state.meals.allMeals);
+  const userCalorieLimit = useSelector(
+    (state) => state.profile.profileData.calorie_limit
+  );
+  console.log("userCalorieLimit :>> ", userCalorieLimit);
+
+  console.log("meals :>> ", meals);
+  useEffect(() => {
+    dispatch(fetchMeals());
+  }, [meals.length]);
+
+  const renderMeals = meals?.map((meal) => {
+    const { id, name, description, calorie_intake, start_date, end_date } =
+      meal;
+    return (
+      <div className="d-flex justify-content-center" key={id}>
+        <Card
+          className={`${
+            userCalorieLimit > meal.calorie_intake
+              ? "border border-primary"
+              : "border border-danger"
+          }`}
+          style={{ color: "#000", width: "18rem", marginBottom: "10px" }}
+        >
+          <Card.Title>{name}</Card.Title>
+          <ListGroup variant="flush">
+            <ListGroup.Item>Calories: {calorie_intake}</ListGroup.Item>
+            <ListGroup.Item>Start Date: {start_date}</ListGroup.Item>
+            <ListGroup.Item>End Date: {end_date}</ListGroup.Item>
+            <ListGroup.Item>Description: {description}</ListGroup.Item>
+          </ListGroup>
+
+          <Button onClick={() => navigate(`/meals/${id}/edit`)}>
+            Edit Meal
+          </Button>
+        </Card>
+      </div>
+    );
+  });
+
+  return (
+    <>
+      <br></br>
+      <Button className="mb-3" onClick={() => navigate("/meals/new")}>
+        Add New Meal
+      </Button>
+      {renderMeals}
+    </>
+  );
+}
+
+export default Meals;
